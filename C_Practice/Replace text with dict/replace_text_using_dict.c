@@ -79,10 +79,13 @@ void main(int argc, char *argv[])
 
 	char *after_replace = NULL;
 	fseek(fp_sc, 0, SEEK_SET);
+	printf("Starting to replace words\n".);
 	replace_words(fp_sc, fp_dict, word_search_array, &after_replace);
+	printf("Finished replacing words\n.");
 	freopen(argv[1], "w", fp_sc);
 	fputs(after_replace, fp_sc);
 	/*free our allocated memory*/
+	printf("Finished copying the data to the file.\nFreeing the memory and files.");
     free(after_replace);
 	free(word_search_start);
 	fclose(fp_dict);
