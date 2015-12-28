@@ -40,7 +40,7 @@ int word_amount = 0;
 void main(int argc, char *argv[])
 {
 
-	//file pointers 
+	/*file pointers*/ 
 	FILE * fp_sc = NULL;
 	FILE * fp_dict = NULL;
 
@@ -57,8 +57,8 @@ void main(int argc, char *argv[])
 		printf("ERROR - cannot open source file at %s.\n", argv[1]);
 		return CANNOT_OPEN_SOURCE_FILE;
 	}
-
-	fp_dict = fopen(argv[2], "r"); // we dont need anything more than read
+	/* we dont need anything more than read*/
+	fp_dict = fopen(argv[2], "r"); 
 	if (fp_dict == NULL) {
 		fclose(fp_sc);
 		printf("ERROR - cannot open dictionary file at %s.\n", argv[3]);
@@ -69,8 +69,10 @@ void main(int argc, char *argv[])
 	<word> : <synonim>*/
 	word_amount = countLines(fp_dict);
 	size_t allocation_size = sizeof(char) * WORD_SIZE * word_amount;
-	char *word_search_array = malloc(allocation_size);// the word search array will contain all the words that we found in the dict file
-	const char *word_search_start = word_search_array;//incase we loose the mem location , we need to free it in the end
+	/* the word search array will contain all the words that we found in the dict file*/
+	char *word_search_array = malloc(allocation_size);
+	/*incase we loose the mem location , we need to free it in the end*/
+	const char *word_search_start = word_search_array;
 
 	/*init the word search array*/
 	if (inint_word_search_array(fp_dict, word_search_start) == ERROR_BAD_FORMAT) {
@@ -79,10 +81,13 @@ void main(int argc, char *argv[])
 
 	char *after_replace = NULL;
 	fseek(fp_sc, 0, SEEK_SET);
+	printf("Starting to replace words\n".);
 	replace_words(fp_sc, fp_dict, word_search_array, &after_replace);
+	printf("Finished replacing words\n.");
 	freopen(argv[1], "w", fp_sc);
 	fputs(after_replace, fp_sc);
 	/*free our allocated memory*/
+	printf("Finished copying the data to the file.\nFreeing the memory and files.");
     free(after_replace);
 	free(word_search_start);
 	fclose(fp_dict);
@@ -115,7 +120,7 @@ int find_word_index(char *word, char *search_index) {
 		}
 		search_index += WORD_SIZE;
 	}
-	return -1; // not found
+	return -1; /* not found*/
 }
 
 /*find how many lines are there in a file*/
@@ -130,7 +135,8 @@ const int countLines(FILE *fp) {
 			lines++;
 		}
 	}
-	fseek(fp, 0, SEEK_SET);//jump back to start of file
+	/*jump back to start of file*/
+	fseek(fp, 0, SEEK_SET);/*jump back to start of file*/
 	return lines;
 }
 
@@ -174,7 +180,7 @@ char* get_synonym(FILE *fp, int index) {
 	}
 	doubledotlocation = strchr(line, ':');
 	++doubledotlocation;
-	strncpy(word, doubledotlocation, strlen(doubledotlocation)); //copys all chars after the the ':'
+	strncpy(word, doubledotlocation, strlen(doubledotlocation)); /*copys all chars after the the ':' char*/
 	CleanupWord(word);/*incase there is some wierd stuff around the word*/
 	return word;
 }
@@ -193,10 +199,10 @@ int inint_word_search_array(FILE *fp, char *search_array) {
 			return ERROR_BAD_FORMAT;
 		}
 
-		*doubledotlocation = '\0';// replace the ':' with \0 so that strlen will do as needed
+		*doubledotlocation = '\0';/* replace the ':' with \0 so that strlen will do as needed*/
 		CleanupWord(word);
 
-		strncpy(word, line, strlen(line)); //copys all chars up to the ':'
+		strncpy(word, line, strlen(line)); /*copys all chars up to the ':' char*/
 		CleanupWord(word);
 		strcpy(search_array, word);
 		search_array += WORD_SIZE;
@@ -215,22 +221,22 @@ void replace_words(FILE *fp_sc, FILE *fp_dict, char *search_array , char** after
 	fseek(fp_sc, 0L, SEEK_END);
 	size_t file_size = ftell(fp_sc);
 	fseek(fp_sc, 0L, SEEK_SET);
-
-	char *whole_file = malloc(file_size*1.5);//in case the synonyms are bigger than origianl word
+	/*in case the synonyms are bigger than origianl word allocate more memory*/
+	char *whole_file = malloc(file_size*1.5);
 	strcpy(whole_file, "");
 	while (!feof(fp_sc) && get_next_word(fp_sc, word) != NULL){
 		if (word != "") {
 			word_location = find_word_index(word, search_array, word_amount);
-			if (word_location >= 0) {// found one
+			if (word_location >= 0) {/* found */
 
-				strcat(whole_file, get_synonym(fp_dict, word_location)); //place the synonym
+				strcat(whole_file, get_synonym(fp_dict, word_location));
 			}
 			else {
-				strcat(whole_file, word); // place the normal word 
+				strcat(whole_file, word);
 			}
 		}
 		strcat(whole_file, get_non_alpha(fp_sc));
-		strcpy(word, ""); // clear the word
+		strcpy(word, ""); /* clear the word*/
 	} 
 
 	*after_replace = whole_file;
