@@ -1,7 +1,7 @@
 
 typedef struct {
 	void * data;
-	void * next;
+	void * next; // T: use pointer for this class instead of void pointer
 	void * previous;
 }Node;
 
