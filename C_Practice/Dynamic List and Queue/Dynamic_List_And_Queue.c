@@ -5,50 +5,50 @@
 #include "dynamic_list.h"
 /*creates a node and sets next and prev as null*/
 Node * Node_init(size_t size, void *data) {
-	Node * n = malloc(size);
-	n->next = NULL;
+	Node * n = malloc(size); // T: no, use sizeof(Node), cast malloc returned value to Node*
+	n->next = NULL; // T: check if malloc succeeded
 	n->previous = NULL;
 
-	memcpy(&n->data, data, size);
+	memcpy(&n->data, data, size); // T: n->data was not allocated
 }
 /*delete a node*/
-void Node_remove(Node * n) {
+void Node_remove(Node * n) { // T: unneccessary
 	free(n);
 }
 /*set node next value*/
-void Node_set_next(void * current, void *next) {
-	((Node *)current)->next = next;
+void Node_set_next(void * current, void *next) { // T: use pointer of Node and not pointer of void
+	((Node *)current)->next = next; // T: check current is not null
 }
 /*set node previous value */
-void Node_set_prev(void * current, void *prev) {
-	((Node*)current)->previous = prev;
+void Node_set_prev(void * current, void *prev) { // T: use pointer of Node and not pointer of void
+	((Node*)current)->previous = prev; // T: check current is not null
 }
 /*get node content void pointer , you need to cast it into the type you saved in the node*/
-void* Node_get_content(void *node) {
+void* Node_get_content(void *node) { // T: use pointer of Node and not pointer of void
 	if (node != NULL) {
 		return ((Node*)node)->data;
 	}
 	return NULL;
 }
 /*set node content*/
-void Node_set_content(void *node, void *data) {
-	((Node*)node)->data = data;
-}
+void Node_set_content(void *node, void *data) { // T: use pointer of Node and not pointer of void
+	((Node*)node)->data = data; // T: check node is not null
+} // T: memory leak, set new data without free the old one
 
 /*List control functions*/
 
 /*Create a new list , if data = NULL there will be no node in the list */
 List * List_create(size_t data_size, void *data) {
-	List * l = malloc(sizeof(List));
-	l->first = NULL;
+	List * l = malloc(sizeof(List)); // T: cast malloc returned value to List*
+	l->first = NULL; // T: check List* l is not null
 	l->last = NULL;
 	l->length = 0;
-	l->node_size = data_size + (sizeof(void*) * 2);
+	l->node_size = data_size + (sizeof(void*) * 2); // T: no
 	/*you have to state the data size , otherwise i dont know how much to allocate*/
 	if (data_size == NULL) {
 		return NULL;
 	}
-	if (data != NULL) {
+	if (data != NULL) { // T: odd.. this function should create list, not create & put first node.
 		Node * n = Node_init(data_size, data);
 		l->first = n;
 		l->last = n;
@@ -58,7 +58,7 @@ List * List_create(size_t data_size, void *data) {
 }
 /*Add a value to the end of the list*/
 void List_add_to_last(List * l, void * data) {
-	Node *n = Node_init(l->node_size, data);
+	Node *n = Node_init(l->node_size, data); // T: check List* l is not null
 	/*if there is a node in the end*/
 	if (l->last != NULL) {
 		((Node*)l->last)->next = n;
@@ -73,7 +73,7 @@ void List_add_to_last(List * l, void * data) {
 }
 /*Add a value to the start of the list*/
 void List_add_to_first(List *l, void * data) {
-	Node *n = Node_init(l->node_size, data);
+	Node *n = Node_init(l->node_size, data); // T: check List* l is not null
 	n->next = l->first;
 	/*if we dont have anything in the list*/
 	if (l->first != NULL) {
@@ -87,7 +87,7 @@ void List_add_to_first(List *l, void * data) {
 }
 /*Remove the selected node from the list*/
 void List_remove_node(List * l, Node * n) {
-	if (l->first == n)
+	if (l->first == n) // T: check List* l and Node* n are not null
 	{
 		/*will put NULL if its the last node*/
 		l->first = n->next;
@@ -107,17 +107,17 @@ void List_remove_node(List * l, Node * n) {
 void List_destroy(List *l) {
 	int i = 0;
 	Node *n = NULL;
-	n = l->first;
+	n = l->first; // T: check List* l is not null
 	while (l->length>0) {
 		List_remove_node(l, n);
 		n = l->first;
 	}
 	free(l);
-	l = NULL;
+	l = NULL; // T: unneccessary
 }
 /*Get the list length*/
 int List_get_length(List  *l) {
-	return l->length;
+	return l->length;// T: check List* l is not null
 }
 
 /*Queue control functions*/
